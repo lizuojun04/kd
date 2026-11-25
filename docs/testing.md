@@ -18,11 +18,7 @@ pieces fit together and the traps found while writing the current tests.
   separate. It is `continue-on-error`, so a failed publish never turns CI red.
   Codecov is deliberately not used: the figure is informational, and this needs
   no account, token or third-party upload action.
-- `test` (macOS, Windows): `go vet`, `go test -count=1 ./...` with
-  `CGO_ENABLED=0`, and a real `kd --daemon` / `--status` / `--stop` smoke test
-  in a temporary HOME. A pre-created `<cache>/run/last_fetch_db` marker makes
-  the data-download job skip, so the smoke test makes no network requests.
-- `cross-build`: `bash scripts/build.sh --all`.
+- `linux-build`: builds the Linux amd64 release binary with `bash scripts/build.sh`.
 - `archlinux`: an `archlinux:base-devel` container. As the non-root user
   `builder` (kd refuses root) it runs the unit tests with `CGO_ENABLED=0`, the
   same daemon smoke test, `--generate-config </dev/null` (EOF answers yes), and

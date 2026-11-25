@@ -3,4 +3,4 @@
 FROM golang:1.27-bookworm
 COPY . /app
 WORKDIR /app
-CMD bash scripts/build.sh -a
+CMD bash scripts/build.sh

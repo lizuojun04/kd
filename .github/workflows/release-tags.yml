@@ -37,10 +37,10 @@ jobs:
             exit 1
           }
 
-      - name: Build all targets
+      - name: Build Linux amd64
         env:
           KD_VERSION: ${{ github.ref_name }}
-        run: bash scripts/build.sh --all
+        run: bash scripts/build.sh
 
       - name: Release
         uses: softprops/action-gh-release@v3
@@ -48,4 +48,4 @@ jobs:
           body: ${{ steps.build_changelog.outputs.changelog }}
           fail_on_unmatched_files: true
           prerelease: false
-          files: build/*
+          files: build/kd_linux_amd64

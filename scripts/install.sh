@@ -1,18 +1,12 @@
 #!/usr/bin/env bash
 set -eu
 
-case "$(uname -s)" in
-    Linux) platform=linux ;;
-    Darwin) platform=macos ;;
-    *) echo "此脚本仅支持 Linux 和 macOS" >&2; exit 1 ;;
-esac
-case "$(uname -m)" in
-    x86_64|amd64) arch=amd64 ;;
-    aarch64|arm64) arch=arm64 ;;
-    *) echo "暂不支持此架构" >&2; exit 1 ;;
+case "$(uname -s)/$(uname -m)" in
+    Linux/x86_64|Linux/amd64) ;;
+    *) echo "本仓库仅提供 Linux amd64 版本" >&2; exit 1 ;;
 esac
 
-url="https://github.com/lizuojun04/kd/releases/latest/download/kd_${platform}_${arch}"
+url="https://github.com/lizuojun04/kd/releases/latest/download/kd_linux_amd64"
 bin_dir="$HOME/.local/bin"
 mkdir -p "$bin_dir"
 tmp=$(mktemp "$bin_dir/.kd.XXXXXXXX")

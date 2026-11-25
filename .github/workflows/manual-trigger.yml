@@ -17,25 +17,13 @@ jobs:
           go-version: '1.27.x'
           check-latest: true
 
-      - name: Build all targets
-        run: bash scripts/build.sh --all
+      - name: Build Linux amd64
+        run: bash scripts/build.sh
 
-      - name: Save macOS artifacts
+      - name: Save Linux amd64 binary
         uses: actions/upload-artifact@v7
         with:
-          name: macos
-          path: build/kd_macos_*
+          name: kd_linux_amd64
+          path: build/kd_linux_amd64
           if-no-files-found: error
           retention-days: 7
-          overwrite: true
-
-      - name: Save Linux and Windows artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: linux-and-win
-          path: |
-            build/kd_linux_*
-            build/kd_windows_*
-          if-no-files-found: error
-          retention-days: 7
-          overwrite: true

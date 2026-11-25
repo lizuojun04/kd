@@ -43,7 +43,7 @@
 - `internal/tts` and `internal/update`: optional speech and binary-update flows.
 - `pkg`: focused filesystem, HTTP, terminal, process, string, and decoration helpers.
 - `e2e`: opt-in end-to-end tests that run a built kd from real shells (see Testing).
-- `scripts/build.sh`: release build logic used by GitHub Actions for Linux amd64/arm64, macOS amd64/arm64, and Windows amd64.
+- `scripts/build.sh`: release build logic used by GitHub Actions for Linux amd64.
 - `docs/testing.md`: how CI is laid out, local Linux and Arch verification, and traps met while writing the tests (including Windows `.bat` fakes). Read it before changing tests or workflows.
 
 ## Development workflow
@@ -58,9 +58,9 @@ gofmt -w path/to/changed.go
 
 Build with `CGO_ENABLED=0`. On Unix use `CGO_ENABLED=0 go build -o build/kd ./cmd/kd`; in PowerShell set `$env:CGO_ENABLED = "0"` before running the equivalent `go build` command.
 
-Before handing off a Go change, run `gofmt` on changed files and at least `go test ./...`. Run `go vet ./...` for changes beyond documentation. After a substantial change is pushed, inspect the GitHub Actions CI result across Linux, macOS, and Windows; investigate failures instead of assuming local success covers platform-specific behavior. The checked-in `Makefile` and release script assume Unix tools; prefer direct Go commands during cross-platform development on Windows.
+Before handing off a Go change, run `gofmt` on changed files and at least `go test ./...`. Run `go vet ./...` for changes beyond documentation. After a substantial change is pushed, inspect the GitHub Actions CI result on Linux; investigate failures instead of assuming local success covers platform-specific behavior. The checked-in `Makefile` and release script assume Unix tools; prefer direct Go commands during cross-platform development on Windows.
 
-`ci.yml` runs five jobs (Ubuntu with race and coverage, the coverage badge, macOS/Windows tests, cross-build, and an Arch Linux container that also builds and namcap-checks the `kd-bin` AUR package); `docs/testing.md` describes them. Windows-only test code is exercised only by Windows CI, so check that job after changing it.
+`ci.yml` runs four jobs (Ubuntu with race and coverage, the coverage badge, Linux amd64 build, and an Arch Linux container that also builds and namcap-checks the `kd-bin` AUR package); `docs/testing.md` describes them.
 
 Do not run `go mod tidy` merely as generic validation because it can rewrite module metadata. When dependency metadata intentionally changes, inspect both `go.mod` and `go.sum`. `anaskhan96/soup` stays on v1.2.5: its v2 tags lack the `/v2` module path, so Go cannot use them; `golang.org/x/net/html` underneath is pinned by kd's own `go.mod`. Prefer small, actively maintained libraries with stable APIs; avoid CGO, large transitive dependency trees, heavyweight frameworks, and dependencies that introduce background services.
 
@@ -115,8 +115,5 @@ Package initialization computes user-level runtime paths, and CLI startup (`runC
 - `userAgents` in `pkg/http.go` supplies the User-Agent of every Youdao request (`GetRandomUA`), and stale browser versions make requests easier to flag as bots. Whenever you write code in this repository, check the `// last update` date above it; if it is more than one month old, refresh the list as part of that work. Use current, real User-Agent strings of mainstream desktop browsers (Chrome, Edge, Firefox, Safari on Windows, macOS and Linux) taken from a verifiable source rather than written from memory, and update the `// last update` date in the same change.
 - Versions: `main.VERSION` (`cmd/kd/version.go`) is not written by hand. Release builds set it to the tag through `KD_VERSION` in `scripts/build.sh` (`-X main.VERSION`); other builds use the module version Go stamps from git or `go install`, else `dev`. Release tags must stay `vX.Y.Z` and artifact names must not change, because installed kd binaries of every version find updates by parsing tag names and downloading `kd_<os>_<arch>`. `update.CompareVersions` ranks a pre-release or pseudo-version below its X.Y.Z release, and `kd --update` refuses to guess for a version it cannot parse.
 - The `kd-bin` AUR package's PKGBUILD lives on the AUR, not here; it installs the release binary with LICENSE under `/usr/share/licenses/kd-bin/` and `scripts/kd-server.service`, whose sha256 sums it pins. The published 0.0.14 PKGBUILD still uses `licenses/kd/`, so `ci.yml` only warns about that until the 0.1.0 PKGBUILD is on the AUR; then remove both exceptions.
-- Release builds are tag-driven through `.github/workflows/release-tags.yml`; `scripts/build.sh` cross-builds all artifacts from one host and is the source of truth for artifact names and linker/build tags.
-- The single Ubuntu release job may cross-compile macOS artifacts only while the build remains pure Go with `CGO_ENABLED=0` and has no dependency on Apple SDKs, Objective-C, native dynamic libraries, or macOS system frameworks. Native macOS CI still provides compile-and-test coverage, but the Linux runner cannot execute the generated release artifacts.
-- Restore a native macOS release job when adding CGO or platform-native code, Apple code signing or notarization, macOS-specific packaging, or when release artifacts require native smoke testing. Treat any such change as a release-process decision rather than silently extending the cross-build script.
-
+- Release builds are tag-driven through `.github/workflows/release-tags.yml`. `scripts/build.sh` builds the sole release asset, `build/kd_linux_amd64`.
 - Fork releases and self-updates use `lizuojun04/kd`. After merging upstream main, push a new fork release tag (`vX.Y.Z`) when ready to publish. Keep the upstream Go module path. The installer defaults to `~/.local/bin`.

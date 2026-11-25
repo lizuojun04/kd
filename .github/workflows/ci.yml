@@ -76,62 +76,7 @@ jobs:
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "coverage: $PCT%"
           git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" badges
 
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
-    env:
-      CGO_ENABLED: "0"
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: '1.27.x'
-          check-latest: true
-
-      - name: Vet
-        run: go vet ./...
-
-      - name: Test
-        run: go test -count=1 ./...
-
-      - name: Start and stop the real daemon
-        shell: bash
-        run: |
-          root=$RUNNER_TEMP/kd-smoke
-          kd=$root/bin/kd
-          if [ "$(go env GOOS)" = windows ]; then
-            root=$(cygpath -m "$root")
-            kd=$root/bin/kd.exe
-          fi
-          mkdir -p "$root/bin" "$root/home"
-          bash scripts/build.sh "$(go env GOOS)" "$(go env GOARCH)" "$kd"
-
-          export HOME=$root/home USERPROFILE=$root/home
-          case "$(go env GOOS)" in
-            darwin) cache=$HOME/Library/Caches/kdcache ;;
-            *) cache=$HOME/.cache/kdcache ;;
-          esac
-          # The marker makes the daemon skip downloading the word database.
-          mkdir -p "$cache/run"
-          : > "$cache/run/last_fetch_db"
-
-          "$kd" --daemon
-          "$kd" --status | tee "$root/status.txt"
-          grep -q 'Daemon状态：运行中' "$root/status.txt"
-          "$kd" --stop
-          "$kd" --status | tee "$root/status.txt"
-          grep -q 'Daemon状态：未运行' "$root/status.txt"
-
-  cross-build:
+  linux-build:
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: "0"
@@ -146,8 +91,8 @@ jobs:
           go-version: '1.27.x'
           check-latest: true
 
-      - name: Build all targets
-        run: bash scripts/build.sh --all
+      - name: Build Linux amd64
+        run: bash scripts/build.sh
 
   # Builds, tests and smoke-tests kd as a normal user on Arch Linux, then
   # checks that the AUR kd-bin package still builds and installs with it.
@@ -197,7 +142,7 @@ jobs:
 
       - name: Build kd
         working-directory: /home/builder/kd
-        run: as-builder bash scripts/build.sh "$(go env GOOS)" "$(go env GOARCH)" "$KD_BIN"
+        run: as-builder bash scripts/build.sh "$KD_BIN"
 
       - name: Smoke test config generation
         run: |

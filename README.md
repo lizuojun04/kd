@@ -85,86 +85,38 @@ kd 专注于简洁、高效、丝滑的查询功能，不会发展成集成式�
 
 ## 🚀 安装和升级
 
-- 这里下载位置为示例，可以下载到任何地方，然后将路径加入PATH环境变量
-- 其他架构需求请提交issue
-- 系统要求：Linux内核3.2及以上（不支持WSL 1）、macOS 13 Ventura及以上、Windows 10/Windows Server 2016及以上
-
-### Linux/MacOS
-
-脚本会下载本仓库最新 Release 中适合当前架构的文件，安装到 `~/.local/bin/kd`。在终端中执行：
+本仓库仅发布 Linux amd64（x86-64）二进制文件。运行以下命令会下载本仓库的最新 Release，安装到 `~/.local/bin/kd` 并启动守护进程，无需 sudo。
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/lizuojun04/kd/main/scripts/install.sh)"
 ```
 
-> 如果raw.githubusercontent.com被屏蔽，改用`git clone https://github.com/lizuojun04/kd && bash kd/scripts/install.sh`
-
-<details><summary>或者按照平台/架构复制命令（🖱️ 点击展开）</summary><pre>
-```bash
-mkdir -p "$HOME/.local/bin"
-# Linux amd64 (x86-64)
-curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_linux_amd64 && chmod +x "$HOME/.local/bin/kd"
-# MacOS arm64 (即M1/M2/M3/M4芯片架构)
-curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_macos_arm64 && chmod +x "$HOME/.local/bin/kd"
-# MacOS amd64 (x86-64)
-curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_macos_amd64 && chmod +x "$HOME/.local/bin/kd"
-# Linux arm64
-curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_linux_arm64 && chmod +x "$HOME/.local/bin/kd"
-```
-</pre></details>
-
-#### ArchLinux
-
-[![AUR Version](https://img.shields.io/aur/version/kd-bin)](https://aur.archlinux.org/packages/kd-bin)
-
-上游版本也可通过[AUR](https://aur.archlinux.org/packages/kd-bin)安装/更新，例如：`yay -S kd-bin`
-
-### Windows
-
-用非管理员模式的Powershell执行:
-
-```powershell
-$bin = Join-Path $HOME ".local/bin"
-New-Item -ItemType Directory -Force $bin | Out-Null
-Invoke-WebRequest 'https://github.com/lizuojun04/kd/releases/latest/download/kd_windows_amd64.exe' -OutFile (Join-Path $bin "kd.exe")
-# 将 $bin 加入用户 Path 后，可直接运行 kd
-```
-
-> 或手动下载文件，然后通过“计算机->属性->修改环境变量”修改PATH
-
-> [!NOTE]
-> kd在Windows上只在PowerShell 7（pwsh）、cmd和Git Bash中进行过稳定性测试。系统自带的旧版Windows PowerShell（5.1及以下）不保证效果，例如查询内容中的双引号会丢失，建议[安装pwsh](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows)后使用
-
-### 其他平台
-
-**Android**
-
-经测试（感谢@Ze-Wshine协助），用aarch64-linux-android-clang交叉编译的kd可以在Termux（安卓平台上的Linux模拟器APP）运行，可以[在此处下载试用](https://github.com/Karmenzind/kd/issues/33#issuecomment-2447229385)。后续有时间会加入标准编译流程作为release发布。
-
-**自行编译**
-
-其他暂未支持的平台，可创建issue反馈需求。也可以自己动手安装最新Go环境，clone此项目后编译。SQLite 使用纯 Go 的 `modernc.org/sqlite`，请保持 `CGO_ENABLED=0`，无需安装C编译器：
-
-类 Unix 环境：
+如果无法访问 raw.githubusercontent.com，也可以执行：
 
 ```bash
-mkdir -p "$HOME/.local/bin"
-CGO_ENABLED=0 go build -mod=readonly -o "$HOME/.local/bin/kd" ./cmd/kd
+git clone https://github.com/lizuojun04/kd
+bash kd/scripts/install.sh
 ```
 
-Windows PowerShell：
+在当前终端运行以下命令即可使用 `kd`。要让新终端也生效，将第一行加入 shell 配置文件。
 
-```powershell
-$env:CGO_ENABLED = "0"
-go build -mod=readonly -o kd.exe ./cmd/kd
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+kd --version
 ```
 
-自行编译的kd，版本号取自git（例如`v0.0.15-0.20261125052350-5d1009b610d1`，表示v0.0.14之后的某次提交），无法取得时显示`dev`。`dev`版本无法判断是否有新版本，`kd --update`会提示改用`kd --update --force`安装最新发布版。
+后续可使用 `kd --update` 升级，也可直接从 [最新 Release](https://github.com/lizuojun04/kd/releases/latest/download/kd_linux_amd64) 下载二进制文件。
+
+**自行编译**（在仓库根目录执行）
+
+```bash
+CGO_ENABLED=0 go build -mod=readonly -o build/kd ./cmd/kd
+```
 
 ### 卸载
 
 <details><summary>🖱️ 点击展开</summary><pre>
-1. 删除kd可执行文件（Linux/macOS：`~/.local/bin/kd`，Windows：`~/.local/bin/kd.exe`）
+1. 删除kd可执行文件（`~/.local/bin/kd`）
 2. 删除配置文件和缓存目录
     - Linux: `rm -rfv ~/.config/kd.toml ~/.cache/kdcache`
     - MacOS: `rm -rfv ~/.config/kd.toml ~/Library/Caches/kdcache`
