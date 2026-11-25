@@ -118,3 +118,5 @@ Package initialization computes user-level runtime paths, and CLI startup (`runC
 - Release builds are tag-driven through `.github/workflows/release-tags.yml`; `scripts/build.sh` cross-builds all artifacts from one host and is the source of truth for artifact names and linker/build tags.
 - The single Ubuntu release job may cross-compile macOS artifacts only while the build remains pure Go with `CGO_ENABLED=0` and has no dependency on Apple SDKs, Objective-C, native dynamic libraries, or macOS system frameworks. Native macOS CI still provides compile-and-test coverage, but the Linux runner cannot execute the generated release artifacts.
 - Restore a native macOS release job when adding CGO or platform-native code, Apple code signing or notarization, macOS-specific packaging, or when release artifacts require native smoke testing. Treat any such change as a release-process decision rather than silently extending the cross-build script.
+
+- Fork releases and self-updates use `lizuojun04/kd`. After merging upstream main, push a new fork release tag (`vX.Y.Z`) when ready to publish. Keep the upstream Go module path. The installer defaults to `~/.local/bin`.

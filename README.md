@@ -10,7 +10,7 @@ kd 专注于简洁、高效、丝滑的查询功能，不会发展成集成式�
 
 保持清晰的边界，把有限的精力持续投入到命令行体验本身，是 kd 的长期设计原则。
 
-[![GitHub Release](https://img.shields.io/github/v/release/karmenzind/kd)](https://github.com/Karmenzind/kd/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/lizuojun04/kd)](https://github.com/lizuojun04/kd/releases)
 [![CI](https://github.com/Karmenzind/kd/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Karmenzind/kd/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Karmenzind/kd/badges/coverage.json)](https://github.com/Karmenzind/kd/actions/workflows/ci.yml)
 [![AUR Version](https://img.shields.io/aur/version/kd-bin)](https://aur.archlinux.org/packages/kd-bin)
@@ -91,25 +91,25 @@ kd 专注于简洁、高效、丝滑的查询功能，不会发展成集成式�
 
 ### Linux/MacOS
 
-在终端中执行：
+脚本会下载本仓库最新 Release 中适合当前架构的文件，安装到 `~/.local/bin/kd`。在终端中执行：
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/Karmenzind/kd/master/scripts/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/lizuojun04/kd/main/scripts/install.sh)"
 ```
 
-> 如果raw.githubusercontent.com被屏蔽，改用`git clone https://github.com/Karmenzind/kd && bash kd/install.sh`
+> 如果raw.githubusercontent.com被屏蔽，改用`git clone https://github.com/lizuojun04/kd && bash kd/scripts/install.sh`
 
 <details><summary>或者按照平台/架构复制命令（🖱️ 点击展开）</summary><pre>
 ```bash
-# （如有需要，可以将路径/usr/bin/kd改成/usr/local/bin/kd）
+mkdir -p "$HOME/.local/bin"
 # Linux amd64 (x86-64)
-sudo sh -c 'curl --create-dirs -L -o /usr/bin/kd https://github.com/Karmenzind/kd/releases/latest/download/kd_linux_amd64 && chmod +x /usr/bin/kd'
+curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_linux_amd64 && chmod +x "$HOME/.local/bin/kd"
 # MacOS arm64 (即M1/M2/M3/M4芯片架构)
-sudo sh -c 'curl --create-dirs -L -o /usr/bin/kd https://github.com/Karmenzind/kd/releases/latest/download/kd_macos_arm64 && chmod +x /usr/bin/kd'
+curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_macos_arm64 && chmod +x "$HOME/.local/bin/kd"
 # MacOS amd64 (x86-64)
-sudo sh -c 'curl --create-dirs -L -o /usr/bin/kd https://github.com/Karmenzind/kd/releases/latest/download/kd_macos_amd64 && chmod +x /usr/bin/kd'
+curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_macos_amd64 && chmod +x "$HOME/.local/bin/kd"
 # Linux arm64
-sudo sh -c 'curl --create-dirs -L -o /usr/bin/kd https://github.com/Karmenzind/kd/releases/latest/download/kd_linux_arm64 && chmod +x /usr/bin/kd'
+curl -fL -o "$HOME/.local/bin/kd" https://github.com/lizuojun04/kd/releases/latest/download/kd_linux_arm64 && chmod +x "$HOME/.local/bin/kd"
 ```
 </pre></details>
 
@@ -117,17 +117,17 @@ sudo sh -c 'curl --create-dirs -L -o /usr/bin/kd https://github.com/Karmenzind/k
 
 [![AUR Version](https://img.shields.io/aur/version/kd-bin)](https://aur.archlinux.org/packages/kd-bin)
 
-ArchLinux推荐直接通过[AUR](https://aur.archlinux.org/packages/kd-bin)安装/更新，例如：`yay -S kd-bin`
+上游版本也可通过[AUR](https://aur.archlinux.org/packages/kd-bin)安装/更新，例如：`yay -S kd-bin`
 
 ### Windows
 
 用非管理员模式的Powershell执行:
 
 ```powershell
-# 下载文件放入C:\bin，这里是amd64(x86-64)架构
-Invoke-WebRequest -uri 'https://github.com/Karmenzind/kd/releases/latest/download/kd_windows_amd64.exe' -OutFile ( New-Item -Path "C:\bin\kd.exe" -Force )
-# 将C:\bin加入PATH环境变量
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\bin", "User")
+$bin = Join-Path $HOME ".local/bin"
+New-Item -ItemType Directory -Force $bin | Out-Null
+Invoke-WebRequest 'https://github.com/lizuojun04/kd/releases/latest/download/kd_windows_amd64.exe' -OutFile (Join-Path $bin "kd.exe")
+# 将 $bin 加入用户 Path 后，可直接运行 kd
 ```
 
 > 或手动下载文件，然后通过“计算机->属性->修改环境变量”修改PATH
@@ -148,8 +148,8 @@ Invoke-WebRequest -uri 'https://github.com/Karmenzind/kd/releases/latest/downloa
 类 Unix 环境：
 
 ```bash
-CGO_ENABLED=0 go build -mod=readonly -o kd ./cmd/kd
-mv kd /usr/bin/kd
+mkdir -p "$HOME/.local/bin"
+CGO_ENABLED=0 go build -mod=readonly -o "$HOME/.local/bin/kd" ./cmd/kd
 ```
 
 Windows PowerShell：
@@ -164,7 +164,7 @@ go build -mod=readonly -o kd.exe ./cmd/kd
 ### 卸载
 
 <details><summary>🖱️ 点击展开</summary><pre>
-1. 删除kd可执行文件（Linux/Mac：/usr/local/bin/kd，Win：C:\bin\kd.exe）
+1. 删除kd可执行文件（Linux/macOS：`~/.local/bin/kd`，Windows：`~/.local/bin/kd.exe`）
 2. 删除配置文件和缓存目录
     - Linux: `rm -rfv ~/.config/kd.toml ~/.cache/kdcache`
     - MacOS: `rm -rfv ~/.config/kd.toml ~/Library/Caches/kdcache`

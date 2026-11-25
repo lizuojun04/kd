@@ -22,8 +22,8 @@ import (
 	"go.uber.org/zap"
 )
 
-var LATEST_RELEASE_URL = "https://github.com/Karmenzind/kd/releases/latest/download/"
-var TAGLIST_URL = "https://api.github.com/repos/Karmenzind/kd/tags"
+var LATEST_RELEASE_URL = "https://github.com/lizuojun04/kd/releases/latest/download/"
+var TAGLIST_URL = "https://api.github.com/repos/lizuojun04/kd/tags"
 
 type GithubTag struct {
 	Name string
